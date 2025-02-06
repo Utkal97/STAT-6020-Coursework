@@ -1,0 +1,4 @@
+"0","# Add a Main Title "
+"0","ggplot(data=penguins, mapping=aes(x=bill_depth_mm, y=bill_length_mm, color=species)) + "
+"0","  geom_point() +"
+"0","  labs(title=""Bill depth and length"")"

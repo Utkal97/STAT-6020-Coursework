@@ -1,0 +1,126 @@
+---
+title: "Lab 5 - Template"
+author: "Utkal Sirikonda"
+output: 
+   html_document: 
+      df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
+```
+
+# Loading Packages
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+#Load any additional packages
+library(nycflights13)
+
+```
+
+# Dataset
+
+```{r}
+# Display flights dataset
+flights
+
+```
+
+
+# filter()
+
+<br>
+
+## Flights that had an arrival delay of two or more hours
+
+```{r}
+filter(flights, arr_delay >= 120)
+```
+
+
+
+## Flights that Flew to Houston (IAH or HOU)
+
+```{r}
+filter(flights, dest == "IAH" | dest == "HOU")
+```
+
+
+## Flights that were operated by United, American, or Delta
+
+```{r}
+filter(flights, carrier == "UA" | carrier == "AA" | carrier == "DL")
+```
+
+
+## Flights that Departed in summer (July, August, and September)
+
+```{r}
+filter(flights, month %in% c(7,8,9))
+```
+
+## Flights that arrived more than two hours late, but didn’t leave late
+
+```{r}
+filter(flights, arr_delay > 120, dep_delay <= 0)
+```
+
+
+## Flights that Were delayed by at least an hour, but made up over 30 minutes in flight
+
+```{r}
+filter(flights, dep_delay >= 60, arr_delay < dep_delay - 30)
+```
+
+
+# arrange()
+
+## Sort `flights` to find the most delayed flights. 
+
+```{r}
+arrange(flights, desc(dep_delay))
+```
+
+
+## Sort `flights` to find the fastest (highest speed) flights. 
+
+```{r}
+arrange(flights, desc(distance / air_time))
+```
+
+# mutate()
+
+## Create 2 new variables, 1 for converted dep_time and one for converted sched_dep_time.
+
+```{r}
+flights_with_new_columns <- flights
+
+flights_with_new_columns <-mutate(flights_with_new_columns,
+converted_dep_time = (((dep_time %/% 100)*60) + (dep_time %% 100)),
+converted_sched_dep_time = (((sched_dep_time %/% 100)*60) + (sched_dep_time %% 100)))
+```
+
+
+# Piping
+
+
+# Create your own Data Transformation
+
+* Use the `flights` dataset
+* Use the `filter()` function to filter the data
+* Use the `select()` function to select at least 3 columns
+* Use the `mutate()` function to create a new variable
+* Use the `arrange()` function to sort
+* Do all of this is one R statement using piping.
+
+
+```{r}
+# pipe is used to filter out all flights departing from JFK on January 1st of each year, selecting some columns and add a column that checks if the flight is delayed for more than 15 minutes, sorted in ascending order of air time
+flights |>
+  filter(origin == "JFK", month == 1, day == 1) |>
+  select(flight, tailnum, origin, dest, air_time, carrier, dep_delay) |>
+  mutate(delay_category = ifelse(dep_delay > 15, "Delayed more than 15 mins", "On Time")) |>
+  arrange(air_time)
+```
+

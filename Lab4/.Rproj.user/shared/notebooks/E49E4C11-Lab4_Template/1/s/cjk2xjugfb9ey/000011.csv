@@ -1,0 +1,7 @@
+"0","# Start with penguins dataframe"
+"0","library(ggplot2)"
+"2","Want to understand how all the pieces fit together? Read R
+for Data Science: https://r4ds.hadley.nz/
+"
+"0","ggplot(data=penguins)"
+"0",""

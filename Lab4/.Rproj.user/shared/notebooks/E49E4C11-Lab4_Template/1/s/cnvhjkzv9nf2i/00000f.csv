@@ -1,0 +1,4 @@
+"0","# Create view of variable types from penguins dataset"
+"0","library(visdat)"
+"0","vis_dat(penguins)"
+"0",""

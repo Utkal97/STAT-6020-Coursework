@@ -1,0 +1,6 @@
+"0","# Start with penguins dataframe"
+"0","# map bill_depth_mm to x axis "
+"0","# map bill_length_mm to y axis"
+"0",""
+"0","ggplot(data=penguins, mapping=aes(x=bill_depth_mm, y=bill_length_mm))"
+"0",""

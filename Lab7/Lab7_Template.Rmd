@@ -1,0 +1,115 @@
+---
+title: "Lab7_Template"
+author: "Utkal Sirikonda"
+output: html_document
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+
+### Exercise 1
+
+```{r ex1}
+table4a
+pivot_longer(table4a, !country, names_to = "year", values_to = "cases")
+```
+
+<br>
+
+
+### Exercise 2
+
+```{r ex2}
+table2
+pivot_wider(table2, names_from = type, values_from = count)
+```
+
+<br>
+
+### Exercise 3
+
+```{r ex3}
+table3
+table3 %>%
+  separate(col=rate, into = c("cases", "population"))
+```
+
+<br>
+
+*** 
+
+
+## Case Study
+
+Use the `pivot_longer()` function to produce create a new dataset `who1` 
+```{r who1}
+
+who1 <- who %>%
+  pivot_longer(
+    cols = new_sp_m014:newrel_f65,
+    names_to = "key",
+    names_transform = list(key = as.character),
+    values_to = "cases",
+    values_drop_na = TRUE,
+  )
+
+who1
+
+who1 %>% 
+  count(key)
+
+```
+
+```{r who2, echo=FALSE}
+who2 <- who1 %>% 
+  mutate(key = stringr::str_replace(key, "newrel", "new_rel"))
+who2
+```
+
+Use `separate()` to split the `key` variable at each underscore the results should be stored in a dataset named `who3`
+
+```{r who3}
+who3 <- who2 %>%
+  separate(col=key, into=c("new", "type", "sexage"), sep="_")
+
+who3
+
+who3 %>% 
+  count(new)
+
+```
+
+```{r who4, echo=FALSE}
+who4 <- who3 %>% 
+  select(-new, -iso2, -iso3)
+who4
+```
+
+Use the separate function to separate `sexage` into `sex` and `age` by splitting after the first character.  Save this dataframe into  new object called `who5`.
+
+```{r who5}
+who5 <- who4 %>%
+  separate(
+    col=sexage, 
+    sep = 1,
+    into = c("sex", "age")
+  )
+
+who5
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

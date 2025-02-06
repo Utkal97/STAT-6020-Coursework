@@ -1,0 +1,125 @@
+---
+title: "HW3 EDA Visualization"
+author: "Utkal Sirikonda"
+output: html_document
+---
+
+# 1. Required Packages for this Analysis
+
+```{r warnings=FALSE, message=FALSE}
+
+library(tidyverse)
+library(AER)
+
+help("Guns", package="AER")
+data("Guns", package="AER")
+```
+<br>
+
+# 2. Dataset
+
+I have chosen to work with the Guns dataset from the AER package. 
+
+<br>
+
+## 3. Description: 
+
+Guns is a balanced panel of data on 50 US states, plus the District of Columbia (for a total of 51 states), by year for 1977–1999.
+
+<br>
+
+
+## 4. First 10 Rows
+
+The first 10 rows of the dataset look like the following. 
+
+```{r}
+head(Guns, 10)
+```
+
+<br>
+
+## 5. Number of Observations and Variables
+
+```{r}
+nrow(Guns)
+
+ncol(Guns)
+```
+
+<br>
+
+## 6. View of types of data
+
+Below is a visual of the types of data in my dataset. 
+
+```{r}
+# CODE TO GENERATE VIEW OF DATA TYPES
+visdat::vis_dat(Guns)
+```
+
+<br>
+
+# Numeric Variables
+
+## 7. Basic Statistcs 
+
+Below are the basic descriptive statistics of the "prisoners" variable.
+
+```{r}
+summary(Guns$prisoners)
+
+mean(Guns$prisoners)
+sd(Guns$prisoners)
+min(Guns$prisoners)
+max(Guns$prisoners)
+```
+
+<br>
+
+## 8. Graph of one variable
+
+```{r}
+ggplot(Guns, aes(x = violent)) +
+  geom_histogram(binwidth = 50) +
+  labs(title = "Distribution of Violent Crime Rates", x = "Violent Crime Rate", y = "Frequency")
+```
+
+<br>
+
+## 9. Description of Graph
+
+The graph is left skewed. We can observe that majority of crimes are less violent and more violent crime rates are less frequent.
+
+<br>
+
+# Relationship between variables.
+
+Below is an analysis of how Violence depends on Density. 
+
+
+<br>
+
+## 10. Graph of two variables
+
+```{r}
+ggplot(Guns, aes(x = violent, y = density)) +
+  geom_line() + geom_point() +
+  labs(title = "Scatter plot of Violent Crime Rate vs Density",
+       x = "Density of Population",
+       y = "Violent Crime Rate (violent)")
+```
+
+<br>
+
+## 11. Description of Graph
+
+The Violent Crime Rate is high where there is more dense population  
+
+
+
+
+
+
+
+
