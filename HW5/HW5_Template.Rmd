@@ -1,0 +1,87 @@
+---
+title: "HW 5 - Data Wrangling"
+name: Utkal Sirikonda
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, prompt = TRUE, comment="")
+```
+
+## Set up
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(datasets)
+```
+
+1. Reshape `us_rent_income` (from the tidyr package) so that it has one line per state, and two new columns named estimate_income and estimate_rent that contain values from estimate.
+
+
+```{r q1}
+
+us_rent_income <- us_rent_income %>% 
+  select(-moe) %>%
+  pivot_wider(
+  names_from = variable, 
+  values_from = estimate
+  ) %>%
+  rename("estimate_income" = income, "estimate_rent" = rent)
+
+us_rent_income
+```
+
+
+```{r}
+# keep this r chunk as is
+s77 <- as_tibble(state.x77, rownames = "State")
+```
+
+2. Merge/Join your result from the previous step with `s77` (from the datasets package), and keep all rows. Then, drop rows where any values are missing. You can do this in one or two steps. 
+
+```{r q2}
+glimpse(s77)
+joint <- full_join(us_rent_income, s77, by=c("NAME"="State")) %>%
+  drop_na()
+
+joint
+```
+
+3. Add a column containing `state.division`.  Keep only the columns __Name, estimate_income, estimate_rent, Population, Income, Area, Frost, and state.division__  
+
+```{r q3}
+joint <- joint %>%
+  select(NAME, estimate_income, estimate_rent, Population, Income, Area, Frost) %>%
+  mutate('state.division' = state.division)
+
+joint
+```
+
+4. Add a column with the proportion of income spent on rent (estimate_rent / estimate_income).
+
+```{r q4}
+jointWithPropIncome <- joint %>% 
+  mutate(propIncome = round((estimate_rent / estimate_income), digits = 4))
+jointWithPropIncome
+```
+
+5. Drop rows where Area is not greater than ten times Frost.
+
+```{r q5}
+jointWithPropIncome <- jointWithPropIncome %>%
+  filter(Area >= 10 * Frost)
+jointWithPropIncome
+```
+
+6. Summarize the data finding the population-weighted mean rent by geographic division. Sort this summary in descending order by Weighted mean. 
+
+```{r q7}
+jointWithPropIncome %>%
+  group_by(state.division) %>%
+  summarise(MeanRent =round(weighted.mean( estimate_rent, Population), digits = 0)) %>%
+  arrange(-MeanRent)
+```
+
+
+
+

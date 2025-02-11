@@ -1,6 +1,6 @@
 ---
 title: "Lab7_Template"
-author: "Utkal Sirikonda"
+author: ""
 output: html_document
 ---
 
@@ -56,10 +56,6 @@ who1 <- who %>%
   )
 
 who1
-
-who1 %>% 
-  count(key)
-
 ```
 
 ```{r who2, echo=FALSE}
@@ -76,14 +72,12 @@ who3 <- who2 %>%
 
 who3
 
-who3 %>% 
-  count(new)
-
 ```
 
 ```{r who4, echo=FALSE}
 who4 <- who3 %>% 
   select(-new, -iso2, -iso3)
+
 who4
 ```
 
