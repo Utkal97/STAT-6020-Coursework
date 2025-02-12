@@ -1,0 +1,89 @@
+---
+title: "Merging Lab Results"
+author: "Utkal Sirikonda"
+output: html_document
+---
+
+### Setting Up
+
+Packages used in this lab. 
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+
+```{r include=FALSE}
+# Leave this r chunck AS IS
+
+enrollment <- read_csv("enrollment.csv")
+survey <- read_csv("survey.csv")
+
+purchases <- read_csv("purchases.csv")
+prices <- read_csv("prices.csv")
+```
+
+
+
+
+## Case Study 1: Student Records
+
+### Joining the `enrollment` and `survey` data so that you have a list of the students in the class with their survey responses.
+
+```{r}
+left_join(enrollment, survey, by = "id")
+```
+
+<br>
+
+### Using a join function to provide a list of students that did not fill out the survey.
+
+```{r}
+anti_join(enrollment, survey, by = "id")
+```
+
+<br>
+
+### Using a join function to provide a list of students that filled out the survey but have dropped the course.
+
+```{r}
+anti_join(survey, enrollment, by = "id")
+```
+
+<br>
+
+***
+
+## Case Study 2: Grocery Sales
+
+### Joining the `purchases` and `prices` datasets to obtain a list purchases with their prices. 
+
+```{r}
+inner_join(purchases, prices, by = "item")
+```
+
+<br>
+
+### Using the join functions and the `summarize` function to obtain an amount of total revenue for purchases. 
+
+```{r}
+total <- purchases %>%
+  inner_join(prices, by = "item") %>%
+  summarize(total_revenue = sum(price))
+
+total
+```
+
+<br>
+
+### The total revenue per customer
+
+```{r}
+revenuePerCustomer <- purchases %>%
+  inner_join(prices, by = "item") %>%
+  group_by(customer_id) %>%
+  summarize(total_revenue = sum(price))
+
+revenuePerCustomer
+```
+
