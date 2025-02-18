@@ -1,0 +1,163 @@
+---
+title: "HW 4: Visualizing and Summarizing Data"
+author: "Utkal Sirikonda"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, class.source="bg-success")
+```
+
+```{r packages, warning=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+## Modify a Graph
+
+###  Modify the following plot to change the color of all points to `"pink"`.
+
+### Add labels for title, x and y axes. 
+
+```{r scatterplot, class.source="bg-danger", class.output="bg-danger"}
+ggplot(
+  starwars,
+  aes(x = height, y = mass, color = gender, size = birth_year)
+  ) +
+geom_point(color = "pink") +
+labs(
+  title = "Mass vs Height of Star Wars Characters",
+  x = "Height",
+  y = "Mass"
+)
+```
+
+
+
+## Categorical Variable 
+
+### Pick a single categorical variable from the data set and make a bar plot of its distribution.
+
+```{r}
+# 
+starwars %>%
+  drop_na(homeworld)  %>%
+  ggplot(aes(x = homeworld)) +
+  geom_bar(fill = "black") +
+  labs(
+    title = "Star Wars Characters by Homeworld",
+    x = "Homeworld",
+    y = "# Characters"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust= 1)
+    )  
+```
+
+### Provide a frequency table of the categorical variable you chose.  
+
+```{r}
+homeworld_freq <- starwars %>%
+  drop_na(homeworld) %>% 
+  count(homeworld, sort = TRUE)
+
+homeworld_freq
+```
+
+## Numerical Variable 
+
+### Pick a single numerical variable and make a histogram of it.
+
+```{r}
+starwars %>%
+  drop_na(height) %>%
+  ggplot( aes(x = height)) +
+    geom_histogram(fill = "black", binwidth = 5) +
+    labs(
+      title = "Height of Star Wars Characters",
+      x = "Height",
+      y = "Frequency"
+    ) 
+```
+
+### Provide a summary of the mean, standard deviation, minmum, and maximum vales of the numerical variable your choose.  
+
+```{r}
+starwars %>%
+  drop_na(height) %>%
+  summarise(
+    mean = mean(height),
+    standard_deviation = sd(height),
+    minimum = min(height),
+    maximum = max(height)
+  )
+```
+
+
+## Numeric and Categorical 
+
+### Pick a numerical variable and a categorical variable and make a visualisation (you pick the type!) to visualise the relationship between the two variables. Along with your code and output, provide an interpretation of the visualisation.
+
+```{r}
+starwars %>%
+  drop_na(species) %>%
+  drop_na(height) %>%
+  ggplot(aes(x = species, y = height)) +
+    geom_boxplot(fill = "lightblue", color = "black") +
+    labs(
+      title = "Heights vs Species in Star Wars Characters",
+      x = "Species",
+      y = "Height"
+    ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# The Quermian, Wookiee (Chewbacca) are tall species, followed by Kaminoan. 
+# Yoda's species are found to be the shortest, followed by Aleena, Ewok and Droids. This is also observable from  the movies.
+```
+
+## Two Categorical Variables 
+
+### Pick two categorical variables and make a visualisation to visualise the relationship between the two variables. Along with your code and output, provide an interpretation of the visualisation.
+
+```{r}
+starwars %>%
+  drop_na(gender) %>%
+  drop_na(homeworld) %>%
+  ggplot( aes(x = homeworld, fill = gender)) +
+    geom_bar(position = "dodge") +
+    labs(
+      title = "Distribution of Gender by Homeworld",
+      x = "Homeworld",
+      y = "Count",
+      fill = "Gender"
+    ) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# Many Homeworlds in the movies show only masculine gender, except for a few Homeworlds where there is only feminine gender like Mirial, Chadrila, etc. More masculine gender characters are shown from Tatooine and Naboo than feminine genders.
+```
+
+## Two Numeric Variables
+
+### Pick two numerical variables and two categorical variables and make a visualisation that incorportes all of them and provide an interpretation with your answer.
+
+```{r}
+starwars %>%
+  drop_na(homeworld) %>%
+  drop_na(gender) %>%
+  ggplot( aes(x = height, y = mass, color = homeworld)) +
+  geom_point(aes(shape = gender), size = 3) +
+
+  labs(
+    title = "Height vs Mass by Homeworld and Gender",
+    x = "Height",
+    y = "Mass",
+    color = "Homeworld",
+    shape = "Gender"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# This plot shows the plot of mass vs height from the characters of different origin(homeworld) and gender. The masculine gender is found to be heavier (more weight) compared to feminine characters. Species from Quermia are found to be the tallest and species from Nal Hutta are found to be heaviest.
+```
+

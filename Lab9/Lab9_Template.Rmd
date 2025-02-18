@@ -1,0 +1,178 @@
+---
+title: "Lab 9: Troubleshooting Error Messages"
+author: "Utkal Sirikonda"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+__Exercise 1__
+
+```{r ex1}
+x <- c(1, 2, 4, 5, 3, 6, 23, 6, 25)
+x
+```
+
+<br>
+
+__Exercise 2__
+
+```{r ex2}
+library(tidyverse)
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point()
+```
+
+<br>
+
+__Exercise 3__
+
+```{r ex3}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(color = "blue")
+```
+
+<br>
+
+__Exercise 4__
+
+```{r ex4}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point()
+```
+
+<br>
+
+__Exercise 5__
+
+```{r ex5}
+filter(mpg, cyl == 8)
+```
+
+<br>
+
+__Exercise 6__
+
+```{r ex6}
+filter(diamonds, color == 'I')
+```
+
+<br>
+
+__Exercise 7__
+
+```{r ex7}
+# glimpse(starwars)
+starwars %>% 
+  filter(eye_color=="blue") %>%
+  group_by(hair_color) %>%
+  summarize(mean_mass = mean(mass, na.rm = TRUE))
+```
+
+<br>
+
+__Exercise 8__
+
+```{r ex8}
+sort(c(2,4,6,8,17), decreasing=TRUE)
+```
+
+<br>
+
+__Exercise 9__
+
+```{r ex9}
+str_remove_all(c("555-1234", "867-5309", "999-9999"), pattern="-")
+```
+
+<br>
+
+__Exercise 10__
+
+```{r ex10}
+library(palmerpenguins)
+library(dplyr)
+
+penguins %>% 
+  filter(island == 'Dream') %>%
+  select(species, bill_length_mm, bill_depth_mm) %>% 
+  group_by(species) %>%
+  summarize(
+    mean_bill = mean(bill_length_mm, na.rm = TRUE),
+    mean_depth=mean(bill_depth_mm, na.rm = TRUE), 
+    n=n()
+  )
+```
+
+<br>
+
+__Exercise 11__
+
+```{r ex11}
+ggplot(msleep, aes(x = sleep_total, y = vore, fill = vore)) +
+  geom_boxplot()
+
+```
+
+<br>
+
+__Exercise 12__
+
+```{r ex12}
+# glimpse(msleep)
+
+ggplot(msleep, aes(x = vore, fill = order)) + 
+  geom_bar(position = "fill")
+
+```
+
+<br>
+
+__Exercise 13__
+
+```{r ex13}
+# glimpse(who)
+
+who %>% 
+  pivot_longer(
+    cols = !c(country, iso2, iso3, year),
+    names_to = "key",
+    values_to = "cases"
+  )
+
+```
+
+<br>
+
+__Exercise 14__
+
+```{r ex14}
+table4a
+table4a %>%
+  pivot_longer(
+    cols = -country,
+    names_to = "year",
+    values_to = "cases"
+  )
+
+```
+
+<br>
+
+__Exercise 15__
+
+```{r ex15}
+ggplot(
+  msleep %>% 
+         filter((conservation == "domesticated" | conservation == "lc") & (vore == "carni" | vore == "herbi")
+                ), 
+  mapping = aes(x = sleep_total, fill = vore)) +
+  geom_histogram(binwidth = 1) + 
+  facet_grid(vore ~ conservation)
+```
+
+<br>
+
+
