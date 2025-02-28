@@ -1,0 +1,206 @@
+---
+title: "HW6_Template"
+author: "Utkal Sirikonda"
+output: html_document
+---
+
+```{r message=FALSE, warning=FALSE}
+# load packages
+library(tidyverse)
+```
+
+
+# Exericse 1
+
+```{r exericse, echo=FALSE}
+#Creating Exercise tibble 
+# Do not change this r chunk
+
+Exercise <- tribble(
+  ~Name, ~Height,
+  "Jennifer", "66",
+  "Beth", "62", 
+  "Brody", "74",
+  "Eric",	"6'3''",
+  "Bob",	"69",
+  "Jonathan", "6 ft"
+)
+Exercise
+```
+
+```{r ex1}
+Exercise %>%
+  mutate(Height = case_when(
+    Name == "Eric" ~ "75",
+    Name == "Jonathan" ~ "72",
+    TRUE ~ as.character(Height)
+  )) %>%
+  mutate(Height = as.numeric(Height))
+
+```
+
+*** 
+
+# Exericse 2
+
+```{r purchases, echo = FALSE}
+#Creating Purchases tibble 
+#Do not change this r chunk 
+
+Purchases <- tribble(
+  ~Item, ~Price,
+"bread",	"$2.50", 
+"milk", "$3.82", 
+"cheese",	"$1.79",
+"cereal",	"$3.27",
+"strawberries", "$2.51", 
+"grapes",	"$2.20"
+)
+Purchases
+```
+
+
+```{r ex2}
+Purchases$Price <- str_remove(Purchases$Price, "\\$")
+Purchases
+```
+
+# Exercise 3
+
+```{r ex3}
+Purchases$Price <- as.numeric(Purchases$Price)
+Purchases
+```
+
+***
+
+# Exericse 4
+
+```{r cats, echo=FALSE, results='hide'}
+# Creating the cat_lovers dataset
+
+cat_lovers <- read_csv("cat-lovers.csv")
+cat_lovers
+```
+
+```{r ex4}
+ggplot(cat_lovers, aes(x=handedness, fill=handedness)) +
+  geom_bar() +
+  labs(x = "handedness", y = "count", title = "Distribution of Handedness among cat lovers")
+```
+
+# Exericse 5
+
+```{r ex5}
+frequency_table <- table(cat_lovers$handedness)
+ordered_frequency_table <- data.frame(frequency_table)
+colnames(ordered_frequency_table) <- c("handedness", "frequency")
+ordered_frequency_table
+
+ggplot(
+  ordered_frequency_table, 
+  aes(x = reorder(handedness, -frequency), y = frequency)
+  ) +
+  geom_bar(stat = "identity") +
+  labs(title = "Distribution of Handedness Among Cat Lovers in decreasing order of frequency",
+       x = "Handedness",
+       y = "Frequency")
+
+```
+
+# Exericse 6
+
+```{r ex6}
+processed_cat_lovers <- cat_lovers %>%
+  filter(!is.na(number_of_cats)) %>%
+  mutate(number_of_cats = as.numeric(number_of_cats))
+
+summary_table <- processed_cat_lovers %>%
+  group_by(handedness) %>%
+  summarise(
+    mean = mean(number_of_cats, na.rm = TRUE),
+    sd = sd(number_of_cats, na.rm = TRUE),
+    min = min(number_of_cats, na.rm = TRUE),
+    max = max(number_of_cats, na.rm = TRUE)
+  )
+
+summary_table
+```
+
+*** 
+
+```{r vis, echo=FALSE}
+# Creating visualization
+
+hotels <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-11/hotels.csv")
+
+hotels %>%
+  group_by(hotel, arrival_date_month) %>%   # group by hotel type and arrival month
+  summarise(mean_adr = mean(adr)) %>%       # calculate mean adr for each group
+  ggplot(aes(
+    x = arrival_date_month,                 # x-axis = arrival_date_month
+    y = mean_adr,                           # y-axis = mean_adr calculated above
+    group = hotel,                          # group lines by hotel type
+    color = hotel)                          # and color by hotel type
+    ) +
+  geom_line() +                             # use lines to represent data
+  theme(axis.text.x = 
+          element_text(angle = 45, vjust = 1, hjust=1)) + # rotate axis label
+  labs(x = "Arrival month",                 # customize labels
+       y = "Mean ADR (average daily rate)",
+       title = "Comparison of resort and city hotel prices across months",
+       subtitle = "Resort hotel prices soar in the summer while ciry hotel prices remain relatively constant throughout the year",
+       color = "Hotel type")
+```
+
+
+
+# Exericse 7
+
+```{r ex7}
+hotels %>%
+  group_by(hotel, arrival_date_month) %>%   # group by hotel type and arrival month
+  summarise(mean_adr = mean(adr)) %>%       # calculate mean adr for each group
+  mutate(arrival_date_month = factor(arrival_date_month, levels = month.name)) %>%
+  ggplot(aes(
+    x = arrival_date_month,                 # x-axis = arrival_date_month
+    y = mean_adr,                           # y-axis = mean_adr calculated above
+    group = hotel,                          # group lines by hotel type
+    color = hotel)                          # and color by hotel type
+    ) +
+  geom_line() +                             # use lines to represent data
+  theme(axis.text.x = 
+          element_text(angle = 45, vjust = 1, hjust=1)) + # rotate axis label
+  labs(x = "Arrival month",                 # customize labels
+       y = "Mean ADR (average daily rate)",
+       title = "Comparison of resort and city hotel prices across months",
+       subtitle = "Resort hotel prices soar in the summer while ciry hotel prices remain relatively constant throughout the year",
+       color = "Hotel type")
+```
+
+# Exericse 8
+
+```{r ex8}
+library(scales)
+
+hotels %>%
+  group_by(hotel, arrival_date_month) %>%   # group by hotel type and arrival month
+  summarise(mean_adr = mean(adr)) %>%       # calculate mean adr for each group
+  mutate(arrival_date_month = factor(arrival_date_month, levels = month.name)) %>%
+  ggplot(aes(
+    x = arrival_date_month,                 # x-axis = arrival_date_month
+    y = mean_adr,                           # y-axis = mean_adr calculated above
+    group = hotel,                          # group lines by hotel type
+    color = hotel)                          # and color by hotel type
+    ) +
+  geom_line() +                             # use lines to represent data
+  scale_y_continuous(labels = label_dollar()) +
+  theme(axis.text.x = 
+          element_text(angle = 45, vjust = 1, hjust=1)) + # rotate axis label
+  labs(x = "Arrival month",                 # customize labels
+       y = "Mean ADR (average daily rate)",
+       title = "Comparison of resort and city hotel prices across months",
+       subtitle = "Resort hotel prices soar in the summer while ciry hotel prices remain relatively constant throughout the year",
+       color = "Hotel type")
+```
+
