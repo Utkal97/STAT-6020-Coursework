@@ -1,0 +1,95 @@
+---
+title: "Lab 12 - Data Import"
+author: "Utkal Sirikonda"
+output:   
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*** 
+
+<br>
+
+### Download the file `nobel.csv` from the Box folder and load the appropriate packages. 
+
+Make sure to save `nobel.csv` in your same directory (folder) as your Lab12_Template.Rmd file
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+<br>
+
+### Read in the file `nobel.csv` 
+
+```{r}
+nobel <- read_csv(file="nobel.csv")
+nobel
+```
+
+<br>
+
+### Split the data into two objects (STEM and non-STEM)
+
+* Create a new data frame, `nobel_stem`, that filters for the STEM fields (Physics, Medicine, Chemistry, and Economics). 
+
+* Create another data frame, `nobel_nonstem`, that filters for the remaining fields.  
+
+__Hint:__ Use the %in% operator when `filter()`ing
+
+```{r}
+stem_categories <- c('Physics', 'Medicine', 'Chemistry', 'Economics')
+
+nobel_stem <- nobel %>%
+  filter(category %in% stem_categories)
+nobel_stem
+
+nobel_nonstem <- nobel %>%
+  filter(!(category %in% stem_categories))
+nobel_nonstem
+```
+
+<br>
+
+### Write out the two dataframes to `nobel-stem.csv` and `nobel-nonstem.csv`, respectively, to your folder. 
+
+```{r}
+nobel_stem
+write_csv(nobel_stem, file = "nobel-stem.csv")
+write_csv(nobel_nonstem, file = "nobel-nonstem.csv")
+```
+
+<br>
+
+### Read in the Excel file called `sales.xlsx` from the Box folder such that is looks like the output in the lab. 
+
+
+```{r}
+sales <- read_excel('sales.xlsx', col_names = FALSE, na = "NA")
+colnames(sales) <- c("id", "n")
+sales <- sales %>%
+  filter(!is.na(n))
+sales
+```
+
+<br>
+
+### Manipulate the sales data such that it looks like output in lab. 
+
+<br>
+
+```{r}
+sales %>%
+  mutate(brand = ifelse(str_detect(id, "^Brand"), id, NA)) %>%
+  fill(brand) %>% 
+  filter(!str_detect(id, "^Brand")) %>% 
+  mutate(id = as.numeric(id), n = as.numeric(n)) %>%
+  select(brand, id, n) 
+```
+
+

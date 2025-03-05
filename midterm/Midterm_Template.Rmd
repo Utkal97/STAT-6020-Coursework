@@ -1,0 +1,177 @@
+---
+title: "Midterm Answers"
+author: "Utkal Sirikonda"
+output: 
+   html_document:
+      df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message=FALSE, class.source="bg-info")
+```
+
+# Question 1
+
+```{r}
+# Question 1
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+
+
+df <- as.data.frame(Seatbelts)
+
+df <- df %>%
+  filter(kms > 10000)
+
+ggplot(df, aes(x = kms, y = DriversKilled, color = factor(law))) +
+  geom_point(size = 3) +
+  labs(
+    title = "Fatalities vs Distance Driven (before and after Seatbelts Law)",
+    x = "Distance Driven (kms in millions)",
+    y = "Number of Driver Fatalities",
+    color = "Law"
+  )
+```
+
+__Name one thing you have learned from data from your visualization.__
+
+I have filtered to check only the high distance traveled samples because I want to study more about what happens when there was high traffic. As we observe, after the Seatbelts law came into act, the number of driver deaths reduced significantly (we can observe that the blue dots are lower in Fatalities even when the Distance Driven is higher).
+
+
+
+# Question 2
+
+Part A: __What is the description (found in the documentation) of the dataset?
+
+Select variables from YRBSS.
+
+```{r}
+#Question 2
+library(openintro)
+
+#glimpse(yrbss)
+
+# Part B
+nrow(yrbss)
+ncol(yrbss)
+
+# Part C
+yrbss_summary <- yrbss %>%
+  summarise(
+    Median = median(height, na.rm = TRUE),
+    IQR = IQR(height, na.rm = TRUE),
+    Q1 = quantile(height, 0.25, na.rm = TRUE),
+    Q3 = quantile(height, 0.75, na.rm = TRUE)
+  )
+
+yrbss_summary
+
+
+# Part D
+table(yrbss$helmet_12m)
+
+# Part E
+DNR_yrbss <- yrbss %>%
+  mutate(helmet_12m = ifelse(helmet_12m == "did not ride", "DNR", helmet_12m))
+
+glimpse(DNR_yrbss)
+table(DNR_yrbss$helmet_12m)
+
+```
+
+# Question 3
+
+```{r}
+#Question 3
+Purchases <- tribble(
+  ~Acct_Num, ~Name, ~Item, 
+  1001, "John Smith", "Laptop,Mouse,Keyboard", 
+  1002, "Sarah Johnson", "Earbuds,Phone", 
+  1003, "Michael Lee", "Charger,Mouse", 
+  1004, "Emma Davis", "Earbuds,Mouse,Keyboard", 
+  1005, "David Brown", "Charger",
+  1006, "Olivia Green", "Phone,Earbuds,Charger",
+  1007, "Liam White", "Mouse,Phone",
+  1008, "Mia Black", "Camera,Phone",
+)
+
+
+Inventory <- tribble(
+  ~Product, ~Price, 
+  "Case", 17.99,
+  "Camera", 39.99,
+  "Charger", 15.54, 
+  "Earbuds", 38.99,
+  "Keyboard", 18.99,
+  "Laptop", 207.98,
+  "Monitor", 107.67,
+  "Mouse", 14.99, 
+  "Phone", 399.97, 
+  "Power Strip", 15.14
+)
+
+
+# A.
+Item_seperated_purchases <- Purchases %>%
+  separate(Item, into = c("Item1", "Item2", "Item3"), sep = ",", fill = "right")
+
+Item_seperated_purchases
+
+# B.
+Long_item_separated_purchases <- Purchases %>% 
+  separate(Item, into = c("Item1", "Item2", "Item3"), sep = ",", fill = "right") %>%
+  pivot_longer(cols = starts_with("Item"), 
+               names_to = "Item_num", 
+               values_to = "Item", 
+               values_drop_na = TRUE) %>%
+  select(-Item_num)
+
+Long_item_separated_purchases
+
+
+# C.
+Final_result <- Long_item_separated_purchases %>%
+  left_join(Inventory, by = c("Item" = "Product")) %>%
+  select(Acct_Num, Name, Item, Price)
+
+
+Final_result
+
+
+# D.
+Items_not_purchased <- Inventory %>%
+  anti_join(Long_item_separated_purchases, by = c("Product" = "Item")) %>%
+  select(Product, Price)
+
+# View the result
+Items_not_purchased
+```
+
+# Question 4
+
+```{r}
+#Question 4
+# glimpse(fastfood)
+fastfood %>%
+  filter(restaurant %in% c("Chick Fil-A", "Mcdonalds", "Burger King")) %>%
+  ggplot(mapping=aes(x=calories, fill = restaurant)) +
+  geom_density(adjust = 2, alpha = 0.5)
+```
+
+# Question 5
+
+```{r}
+#Question 5
+glimpse(movies)
+
+processed_movies <- movies %>%
+  filter(rating != "G") %>%
+  arrange(rating, desc(score)) %>%
+  mutate(box_office_dollars = box_office * 1000000) %>%
+  select(-movie, -box_office) %>%
+  filter(genre %in% c("action", "rom-comedy", "comedy"))
+
+processed_movies
+```
+
