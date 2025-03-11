@@ -1,0 +1,107 @@
+---
+title: "Resume"
+# author: "Utkal Sirikonda"
+# date: "2025-03-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+<div style="display: flex; justify-content: space-between; align-items: center;">
+  <h3>Utkal Sirikonda</h3>
+  <img src="profile_pic.jpg" alt="Profile Picture" style="width: 100px; height: auto; border-radius: 50%;">
+</div>
+
+- **Phone:** (864) 765-8134  
+- **Email:** [utkal082797@gmail.com](mailto:utkal082797@gmail.com)  
+- **LinkedIn:** [utkalsirikonda](https://www.linkedin.com/in/utkalsirikonda)  
+- **GitHub:** [Utkal97](https://github.com/Utkal97)  
+
+---
+
+## Experience
+
+#### Software Engineer *(Jan 2025 – Present)*  
+##### **Tabbi Inc.** - Greenville, SC, USAs
+
+- Developed and maintained a user-centric mobile application using **React Native** and **TypeScript**, enhancing performance and user experience.
+- Optimized data retrieval by reorganizing and structuring files in **AWS S3**, reducing fetch latency and improving storage efficiency.
+- Configured and automated **AWS Amplify policies** within a **CloudFormation stack**, streamlining infrastructure management and security compliance.
+- Migrated **RESTful APIs** from **Ruby on Rails** to **Node.js**, integrating **GraphQL** for efficient data fetching and improved scalability.
+
+#### Full-stack Developer Co-op *(June 2024 – Dec 2024)*  
+##### **SS&C Technologies** - Boston, MA, USA
+
+- Developed a **Full-stack application** to visualize server health and test runs using **React, JavaScript, HTML, CSS**, and **Module Federation**.
+- Decoupled a **monolith application** into **Node.js micro-services** with **PostgreSQL** and **Postman** testing. Containerized with **Docker**.
+- Automated **OpenAPI Specification (OAS 3.0)** generation for **Resourceful REST APIs**.
+- Implemented **Server Sent Events (SSE)** for live data charts, reducing client API calls by **70%**.
+
+#### Technical Lead - Full-stack *(Jan 2021 – Aug 2023)*  
+##### **Inncircles** - Hyderabad, India
+
+- Enhanced and sustained an internal construction management application using **Node.js, Express.js, React, and MongoDB**.
+- Improved system performance by redesigning data models, reducing API runtime from **400ms to 80ms**.
+- Implemented Redis caching, reducing response time to one-tenth.
+- Managed a team of **4 software developers**, gathering functional requirements from clients.
+- Developed an auto-scheduling algorithm analyzing **1.3M data points**, estimating project completion timelines.
+- Automated work orders, material procurement, and data analysis involving **1M+ data points**.
+- Replaced local file storage with **AWS S3** for managing visual work logs.
+
+
+## Education
+
+#### **Clemson University** *(Aug 2023 - May 2025)*  
+Master of Science in Computer Science  
+**GPA:** *3.85/4.0*  
+
+#### **Indian Institute of Information Technology** *(Sep 2015 - Jun 2019)*  
+Bachelor of Technology in Computer Science  
+**CGPA:** *8.3/10.0*  
+
+---
+
+## Technical Skills
+
+- **Languages:** Python, JavaScript/TypeScript  
+- **Technologies:** Node.js, Express.js, Django, React, Redux  
+- **Database:** MongoDB (NoSQL), TimeScaleDB (PostgreSQL)  
+- **Tools:** Git, Docker, AWS - S3, EC2, Lambda, DynamoDB, Amplify, CloudFormation  
+- **Coursework:**  
+  - Data Structures and Algorithms  
+  - Software Design  
+  - Object-Oriented Programming  
+
+---
+
+## Projects
+
+### Festive Fusion *(Python, Pygame)*
+
+- Developed a **multi-level game** using **Python and Pygame**, implementing **Software Design Patterns**.
+- Implemented key features like:
+  - **Game save/load functionality** using the **Memento pattern**.
+  - **Singleton and Factory patterns** for optimized object creation.
+
+---
+
+## R Code Demo
+
+### R Code with Displayed Output
+```{r}
+project_description <- "Developed an adventure game using Python and Pygame, implementing Software Design Patterns"
+
+print(project_description)
+```
+
+### R Code with Hidden Code but Displayed Output
+```{r, echo=FALSE}
+outro <- "I'm an experienced application developer and a graduate student at Clemson University. I'm graduating in May 2025 and looking for Software Development roles starting May 2025."
+
+outro
+```
+
+---
