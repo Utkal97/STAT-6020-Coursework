@@ -1,0 +1,112 @@
+---
+title: 'Lab 15: Assignment'
+author: "Utkal Sirikonda"
+output: html_document
+---
+
+```{r include=FALSE}
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+```
+
+# Example 1
+
+```{r echo=FALSE}
+juice <- read_csv("Juice.txt", col_names = TRUE)
+```
+
+```{r}
+hist_plot <- ggplot(juice, aes(x = FillAmount)) +
+  geom_histogram(binwidth = 0.2, fill = "skyblue", color = "black") +
+  theme_minimal() +
+  labs(title="Histogram of Fill Amount", x="Fill Amount (fl oz)", y="Frequency")
+
+
+box_plot <- ggplot(juice, aes(x = FillAmount)) +
+  geom_boxplot(fill = "lightgreen", color = "black") +
+  theme_minimal() +
+  ggtitle("") +
+  labs(title="Boxplot of Fill Amount", x="Fill Amount (fl oz)")
+
+ggarrange(hist_plot, box_plot, ncol = 2, nrow = 1)
+```
+
+# Example 2
+
+```{r echo=FALSE}
+opera1 <- read_tsv("Opera.txt")
+```
+
+```{r}
+processed_opera1 <- opera1 %>%
+  pivot_longer(cols = everything(), names_to = "Approach", values_to = "Amount")
+
+processed_opera1
+```
+
+```{r}
+processed_opera1 %>% 
+  group_by(Approach) %>%
+  get_summary_stats(type="mean_sd")
+```
+
+# Example 3
+
+```{r echo=FALSE}
+chol <- read_tsv("Blood_Cholesterol.txt")
+```
+
+Hypotheses for Example 3
+
+
+
+```{r}
+chol.long <- chol %>%
+  pivot_longer(cols = c("Before", "After"),
+               names_to = "group", 
+               values_to = "Cholesterol")
+
+chol <- chol %>%
+  mutate(difference = After - Before)
+
+statsEx3 <- chol.long %>%
+  group_by(group) %>%
+  get_summary_stats(Cholesterol, type="mean_sd")
+
+diff <- chol %>%
+  get_summary_stats(difference, type="mean_sd")
+
+hist3 <- chol.long %>%
+  ggplot(mapping=aes(x = Cholesterol, fill=group)) +
+  geom_histogram(binwidth = 10) 
+
+diff_hist <- chol %>%
+  ggplot(mapping=aes(x = difference)) +
+  geom_histogram(binwidth = 10) 
+
+
+bp3 <- chol.long %>%
+  ggplot(mapping=aes(x=Cholesterol, fill=group)) +
+  geom_boxplot(outlier.color = "#F56600", 
+               outlier.size = 3.0) 
+
+diff_bp <- chol %>%
+  ggplot(mapping=aes(x=difference)) +
+  geom_boxplot(outlier.color = "#F56600", 
+               outlier.size = 3.0) 
+
+hist3
+bp3
+diff_hist
+diff_bp
+
+ggarrange(hist3, bp3, diff_hist, diff_bp, ncol = 2, nrow = 2)
+
+st3 <- chol %>% shapiro_test(difference)
+st3
+
+ggqqplot(chol$difference)
+```
+
+
