@@ -16,7 +16,7 @@ library(rstatix)
 juice <- read_csv("Juice.txt", col_names = TRUE)
 ```
 
-```{r}
+```{r fig.show='hold', out.width='50%'}
 hist_plot <- ggplot(juice, aes(x = FillAmount)) +
   geom_histogram(binwidth = 0.2, fill = "skyblue", color = "black") +
   theme_minimal() +
@@ -29,7 +29,9 @@ box_plot <- ggplot(juice, aes(x = FillAmount)) +
   ggtitle("") +
   labs(title="Boxplot of Fill Amount", x="Fill Amount (fl oz)")
 
-ggarrange(hist_plot, box_plot, ncol = 2, nrow = 1)
+hist_plot
+
+box_plot
 ```
 
 # Example 2
