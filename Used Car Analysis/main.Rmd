@@ -1,0 +1,92 @@
+---
+title: "User Car Analysis"
+author: "Utkal Sirikonda"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: yeti
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+In this project, we study used car data. Analyzing used cars for their reliability is a huge deal for people who are willing to buy one.
+
+## Data Collection
+
+* The dataset is obtained from Kaggle: [used-car-catalog](https://www.kaggle.com/datasets/lepchenkov/usedcarscatalog?resource=download)
+* As mentioned in the link, the data is collected from various web resources in order to explore the used cars market and try to build a model that effectively predicts the price of the car based on its parameters (both numerical and categorical).
+* This dataset contains used car ads from a popular online catalogs in Belarus on December 2nd, 2019.
+* The dataset contains 30 variables, where each row is a car ad, described by manufacturer, model, mileage, production year, and many other properties.
+
+
+## Importing Data
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(DT)
+```
+
+```{r, warning=FALSE}
+input_data <- read.csv("cars.csv", header = TRUE, stringsAsFactors = FALSE)
+
+# datatable(input_data, options = list(pageLength = 10))
+
+glimpse(input_data)
+```
+
+## Data Pre-processing and Manipulation
+
+### Some key observations
+
+* Any record without manufacturer_name, model_name, year_produced doesn't describe the car properly, so need to eliminate any such records
+
+* Boolean variables (engine_has_gas, has_warranty, is_exchangeable, feature_*) are stored as "False"/"True" (character strings) instead of actual TRUE/FALSE (logical type).
+
+* Feature variables (feature_0 to feature_9) don't contribute semantically to our analysis as they are not described properly. So, we can either choose to neglect them, or we can just count the number of features and make a new variable out of it.
+
+* Select variables of interest and neglect the rest
+
+* Naming variables can be improvised
+
+### Pre-processing and manipulation:
+
+1. Filter NA records.
+```{r}
+processed_data <- input_data %>%
+  drop_na(manufacturer_name, model_name, year_produced)
+```
+
+2. Convert Boolean Columns to Logical Type (TRUE/FALSE).
+
+```{r}
+processed_data <- processed_data %>%
+  mutate(across(c(engine_has_gas, has_warranty, is_exchangeable,starts_with("feature_")), 
+                ~ . == "True"))
+```
+
+3. Reshape feature_0 to feature_9 into a feature_count.
+```{r}
+processed_data <- processed_data %>%
+  mutate(feature_count = rowSums(select(., starts_with("feature_"))))
+```
+
+4. Filter out unrequired variables.
+```{r}
+processed_data <- processed_data %>%
+  select(manufacturer_name, model_name, year_produced, 
+         engine_type, engine_capacity, transmission, 
+         body_type, drivetrain, color, mileage = odometer_value, engine_fuel,state,location_region,number_of_photos,
+         price_usd, has_warranty, is_exchangeable,duration_listed,up_counter, feature_count)
+```
+
+
+## Processed data
+```{r, warning=FALSE}
+datatable(processed_data, options = list(pageLength = 10))
+```
