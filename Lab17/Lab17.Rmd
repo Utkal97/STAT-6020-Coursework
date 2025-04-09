@@ -1,0 +1,125 @@
+---
+title: "Lab17 - Shiny Package Part 1"
+author: "Utkal Sirikonda"
+date: "2025-04-08"
+output: html_document
+runtime: shiny
+---
+
+# Drop Down Menu
+
+```{r}
+
+selectInput(inputId = 'dropDownExample',
+            label = 'Please make a selection',
+            choices = list('value 1' = 1,
+                           'value 2' = 2,
+                           'value 3' = 3))
+
+renderPrint(input$dropDownExample)
+```
+
+# Slider Input
+
+```{r}
+
+# single value slider
+sliderInput(inputId = 'sliderExample',
+            label = 'Select a value',
+            min = 0, max = 10, value =3)
+
+# range with slider
+sliderInput(inputId = 'sliderExample',
+            label = 'Select a value',
+            min = 0, max = 10, value = c(2,6))
+```
+
+# Checkbox
+
+```{r}
+checkboxInput(inputId = 'checkboxExample',
+              label = 'Chack here')
+
+# multiple check box
+checkboxGroupInput(inputId = 'checkboxGroupExample',
+                   label = 'Select all that apply',
+                   choices = c('a', 'b', 'c'))
+```
+
+
+# Radio Buttons
+```{r}
+
+radioButtons(inputId = 'RadioButtonExample',
+             label = 'Please select one',
+             choices = c('A', 'B', 'C'))
+```
+
+# Date Input
+```{r}
+
+dateInput(inputId = 'DateExample',
+          label = 'Date Selected')
+
+# Date range selection
+dateRangeInput(inputId = 'DateExample2',
+               label = 'Please select dates')
+
+# Different formatting
+dateRangeInput(inputId = 'DateExample2',
+               label = 'Please select dates',
+               format = 'mm/dd/yyyy')
+```
+
+
+# Textbox
+
+```{r}
+textInput(inputId = 'TextInput',
+          label = "Enter text here")
+
+renderPrint(input$TextInput)
+renderText(input$TextInput)
+
+# Multi-line Text
+textAreaInput(inputId = 'TextAreaInput',
+              label = "Enter a block of text")
+```
+
+# Print Datatables
+
+```{r}
+# small data table
+renderTable(mtcars)
+
+# large data table
+renderDataTable(mtcars)
+
+# using the DT package
+DT::renderDataTable(mtcars)
+```
+
+
+# Rendering a plot according to variable
+
+```{r}
+library(tidyverse)
+selectInput(inputId = 'variable',
+            label = 'Select variable to graph',
+            choices = names(mtcars))
+
+sliderInput(inputId = 'binSize',
+            label = 'Select bin size',
+            min = 5, max = 50, value = 25)
+
+selectInput(inputId = 'Color',
+            label = 'Choose a color',
+            choices = colors())
+
+renderPlot(ggplot(mtcars, 
+                  aes_string(x=input$variable))+
+             geom_histogram(bins = input$binSize,
+                            fill=input$Color,
+                            col="black"))
+```
+
