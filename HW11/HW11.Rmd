@@ -1,0 +1,70 @@
+---
+title: "HW11 Flexdashboard"
+author: "- Utkal Sirikonda"
+runtime: shiny
+output: 
+  flexdashboard::flex_dashboard
+---
+
+# Diamonds Visualization
+
+```{r}
+library(shiny)
+library(tidyverse)
+library(dplyr)
+
+```
+
+
+Column {.sidebar}
+------------------------------------
+
+Select Inputs
+
+```{r}
+sliderInput("caratRange", "Select a range to filter carat:",
+            min = min(diamonds$carat),
+            max = max(diamonds$carat),
+            value = c(0.7, 2.2))
+
+radioButtons("cutInput", "Please select a diamond cut:",
+             choices = unique(diamonds$cut),
+             selected = "Ideal")
+
+selectInput("variable", "Select variable to graph:",
+            choices = names(diamonds)[sapply(diamonds, is.numeric)],
+            selected = "price")
+```
+
+
+
+Column 
+-------------------------------
+
+### Filtered Data Table
+
+Data Table updates according to Range and Diamond Cut filters from side bars
+```{r}
+renderDataTable({
+  diamonds %>%
+    filter(carat >= input$caratRange[1],
+           carat <= input$caratRange[2],
+           cut == input$cutInput)
+})
+```
+
+
+### Render Plot
+
+Histogram's binWidth is the difference of highest carat value - lowest carat value selected, and x will be the variable (numerical variables) selected from input on Sidebar
+
+```{r}
+renderPlot({
+filtered_data <- diamonds %>%
+    filter(cut == input$cutInput)
+
+  ggplot(filtered_data, aes_string(x = input$variable)) +
+    geom_histogram(binwidth = input$caratRange[2] - input$caratRange[1], fill = "red")
+})
+```
+
