@@ -1,5 +1,5 @@
 ---
-title: "User Car Analysis"
+title: "User Car Price Analysis"
 author: "Utkal Sirikonda"
 output: 
   html_document:
@@ -8,55 +8,73 @@ output:
     number_sections: true
     theme: yeti
     highlight: tango
+    code_download: true
 ---
 
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
-## Introduction
-In this project, we study used car data. Analyzing used cars for their reliability is a huge deal for people who are willing to buy one.
-
-## Data Collection
-
-* The dataset is obtained from Kaggle: [used-car-catalog](https://www.kaggle.com/datasets/lepchenkov/usedcarscatalog?resource=download)
-* As mentioned in the link, the data is collected from various web resources in order to explore the used cars market and try to build a model that effectively predicts the price of the car based on its parameters (both numerical and categorical).
-* This dataset contains used car ads from a popular online catalogs in Belarus on December 2nd, 2019.
-* The dataset contains 30 variables, where each row is a car ad, described by manufacturer, model, mileage, production year, and many other properties.
-
-
-## Importing Data
-
-```{r, echo=FALSE}
+```{r, message=FALSE}
 library(tidyverse)
 library(DT)
+library(car)
+library(tibble)
+library(ggpubr)
+library(rstatix)
+library(moderndive)
+library(glue)
 ```
 
-```{r, warning=FALSE}
+## Abstract
+In this study, we take used cars catalog of cars in the market over the years. From the available quantitative variables, we try to arrive at a multiple regression model to estimate the price of the car based on the quantitative values. We also analyse which variables are actually contributing to the price of the used car.
+
+### Note
+Going further in analysis, it is found that using the complete data (of ~37000 observations) is not helpful since it doesn't contribute to a normal distribution, so we take random samples. Every time we run the code, there can be minor changes in p-values, causing some variables to not contribute to price estimation. I have listed my observations after running the tests multiple times, so the summary result will typically be the similar.
+
+
+![Purchasing a Used Car](https://s3.us-east-2.amazonaws.com/irwin-ag/buying-used/Figuring-Out-Need-Used-Cars-2.jpg)
+
+
+## Introduction
+
+In this project, we study used car data. Analyzing used cars for their reliability is a huge deal for people who are willing to buy one.
+
+## Data
+
+### Collection
+* The data-set is obtained from Kaggle: [used-car-catalog](https://www.kaggle.com/datasets/lepchenkov/usedcarscatalog?resource=download)
+* As mentioned in the source, the data is collected from various web resources in order to explore the used cars market.
+* This data-set contains used car ads from a popular online catalogs in Belarus on December 2nd, 2019.
+* The data-set contains 30 variables, where each row is a car ad, described by manufacturer, model, mileage, production year, and many other properties.
+
+
+### Importing Data
+
+The top rows of raw data looks like:
+```{r}
 input_data <- read.csv("cars.csv", header = TRUE, stringsAsFactors = FALSE)
 
-# datatable(input_data, options = list(pageLength = 10))
-
-glimpse(input_data)
+datatable(head(input_data, nrows = 10))
 ```
 
-## Data Pre-processing and Manipulation
+Some key observations
 
-### Some key observations
+* Any record without manufacturer_name, model_name, year_produced doesn't describe the car properly, so any such records are eliminated.
 
-* Any record without manufacturer_name, model_name, year_produced doesn't describe the car properly, so need to eliminate any such records
-
-* Boolean variables (engine_has_gas, has_warranty, is_exchangeable, feature_*) are stored as "False"/"True" (character strings) instead of actual TRUE/FALSE (logical type).
+* Boolean variables (engine_has_gas, has_warranty, is_exchangeable, feature_*) contain character strings "False"/"True" instead of logical values TRUE/FALSE.
 
 * Feature variables (feature_0 to feature_9) don't contribute semantically to our analysis as they are not described properly. So, we can either choose to neglect them, or we can just count the number of features and make a new variable out of it.
 
-* Select variables of interest and neglect the rest
+* Select variables of interest and neglect the rest.
 
 * Naming variables can be improvised
 
-### Pre-processing and manipulation:
+### Data Manipulation
 
-1. Filter NA records.
+1. Filter records with manufacturer_name, model_name, year_produced as NA.
+
 ```{r}
 processed_data <- input_data %>%
   drop_na(manufacturer_name, model_name, year_produced)
@@ -71,12 +89,14 @@ processed_data <- processed_data %>%
 ```
 
 3. Reshape feature_0 to feature_9 into a feature_count.
+
 ```{r}
 processed_data <- processed_data %>%
   mutate(feature_count = rowSums(select(., starts_with("feature_"))))
 ```
 
-4. Filter out unrequired variables.
+4. Filter out un-required variables.
+
 ```{r}
 processed_data <- processed_data %>%
   select(manufacturer_name, model_name, year_produced, 
@@ -85,8 +105,375 @@ processed_data <- processed_data %>%
          price_usd, has_warranty, is_exchangeable,duration_listed,up_counter, feature_count)
 ```
 
-
-## Processed data
-```{r, warning=FALSE}
+```{r}
 datatable(processed_data, options = list(pageLength = 10))
 ```
+
+### Final Data - Sampling
+
+When using all the records from processed data, we see much variance, and the distribution doesn't fit in Normal Distribution.
+
+To show this, we try displaying a few graphs:
+
+#### QQ Plot over processed data
+
+```{r}
+model <- lm(price_usd ~ manufacturer_name, data = processed_data)
+
+ggqqplot(residuals(model))
+```
+
+The plot deviates significantly and it doesn't look like a normal distribution.
+
+#### Mileage vs Price
+
+```{r}
+processed_data %>% ggplot(aes(x=mileage, y=price_usd)) + geom_point()
+```
+
+Complete processed data doesn't display much of a pattern since it is dense until 500000 km mileage.
+
+#### Random samples
+
+As we sample the data, we start to observe patterns and it seems to be more normally distributed.
+
+Taking 50 random samples from processed data:
+
+```{r}
+sampled_data <- processed_data %>% slice_sample(n = 50)
+```
+
+
+```{r}
+
+ANOVAmodel <- lm(price_usd ~ manufacturer_name, data = sampled_data)
+
+# Create a QQ plot of residuals using ggpubr package
+ggqqplot(residuals(ANOVAmodel))
+```
+
+This looks more normal with minor deviations. So, the sampled data can be applicable for ANOVA test.
+
+We can observe a pattern for sampled data. As mileage increases, price decreases:
+```{r}
+sampled_data %>% ggplot(aes(x=mileage, y=price_usd)) + geom_point()
+```
+
+
+### Description of Variables
+
+```{r, echo=FALSE}
+variable_description <- data.frame(
+  Variable = c("manufacturer_name", "model_name", "year_produced", "engine_type", "engine_capacity", "transmission", "body_type", "drivetrain", "color", "mileage", "engine_fuel",  "state", "location_region", "number_of_photos", "price_usd", "has_warranty",  "is_exchangeable", "duration_listed", "up_counter", "feature_count"),
+  Type = c("Categorical", "Categorical", "Numeric", "Categorical", "Numeric", "Categorical", "Categorical", "Categorical", "Categorical", "Numeric", "Categorical", "Categorical", "Categorical", "Numeric", "Numeric", "Binary", "Binary", "Numeric", "Numeric", "Numeric"),
+  Description = c(
+    "Manufacturer of the car",
+    "Model name of the car",
+    "Year the car was produced",
+    "Type of engine (e.g., gasoline, diesel)",
+    "Engine capacity in liters",
+    "Type of transmission (automatic or mechanical)",
+    "Body style (e.g., sedan, suv, universal)",
+    "Drivetrain type (all, front, rear)",
+    "Color of the car",
+    "Mileage (in kilometers)",
+    "Type of fuel used",
+    "Ownership status",
+    "Region where car is located",
+    "Number of photos uploaded for the ad",
+    "Price of the car in USD",
+    "Warranty availability (TRUE/FALSE)",
+    "Exchange possibility (TRUE/FALSE)",
+    "Number of days the listing was active",
+    "Number of times the ad was bumped up",
+    "Number of features listed for the car"
+  )
+)
+
+datatable(variable_description,
+          options = list(autoWidth = TRUE),
+          caption = "Description of Each Variable in the Used Cars Dataset")
+```
+
+
+
+## Descriptive Statistics
+
+```{r}
+desc_stats <- processed_data %>%
+  select(where(is.numeric)) %>%
+  pivot_longer(cols = everything(), names_to = "variable_name", values_to = "value") %>%
+  group_by(variable_name) %>%
+  summarise(
+    count = sum(!is.na(value)),
+    mean = mean(value, na.rm = TRUE),
+    sd = sd(value, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+datatable(desc_stats)
+```
+
+We observe that the Standard Deviation for mileage is significant inferring there are cars with varying mileage.
+
+## Multiple Regression to estimate Price
+We display patterns of how each quantitative variable affects price of car.
+
+As mileage increases, price decreases:
+```{r}
+sampled_data %>% ggplot(aes(x=mileage, y=price_usd)) + geom_point()
+```
+
+Similarly, year produced also seems to affect price of the car after looking at Sampled data.
+
+```{r}
+sampled_data %>% ggplot(aes(x=year_produced, y=price_usd)) + geom_point()
+```
+
+Plotting other variables against price to check if any of them affect price of the used car.
+
+```{r}
+sampled_data %>% ggplot(aes(x=up_counter, y=price_usd)) + geom_point()
+```
+
+```{r}
+sampled_data %>% ggplot(aes(x=number_of_photos, y=price_usd)) + geom_point()
+```
+
+```{r}
+sampled_data %>% ggplot(aes(x=feature_count, y=price_usd)) + geom_point()
+```
+
+```{r}
+sampled_data %>% ggplot(aes(x=engine_capacity, y=price_usd)) + geom_point()
+```
+
+```{r}
+sampled_data %>% ggplot(aes(x=duration_listed, y=price_usd)) + geom_point()
+```
+
+
+From the plots, it is observed that Mileage, Year of production, Number of Photos for the listing, Number of features, Engine Capacity of the car influence the price of the used car.
+So, we choose those variables as explanatory variables and apply the Multi- Linear Regression model to estimate price of the car.
+
+```{r}
+multi_model <- lm(price_usd ~ mileage + year_produced + number_of_photos + feature_count + engine_capacity, data = sampled_data)
+
+#plot(multi_model)
+
+ggqqplot(residuals(multi_model))
+```
+
+Looking at the QQ plot, we can see that we have a fairly normal distributed data (even though there are some outliers).
+
+```{r}
+summary <- get_regression_summaries(multi_model, digits = 25)
+summary
+```
+
+The summary table shows that we have a low p-value (compared to typical alpha, 0.05), proving that there is sufficient evidence to suggest that the overall model using mileage, year_produced, number_of_photos, feature_count, engine_capacity can be used to predict price of car.
+
+But from computing regression table:
+
+```{r}
+regression_table <- get_regression_table(multi_model, digits=25) 
+regression_table %>% knitr::kable()
+```
+
+## Summary
+
+Not all variables compute significantly to the price as they have significantly higher value than alpha (0.05). When I sampled the data, I had p-value for mileage higher than 0.05, indicating it was not significantly explaining the price of car. But this might change for each run, since we choose 50 random samples on every run from the processed data.
+
+### Equation for Multiple Regression
+The coefficients for each variable changes every time we run and sample data. We filter out the variables whose p-values are > 0.05. This equation dynamically updates and only includes the variables that are significantly contributing to price:
+
+
+```{r, results='asis' }
+ 
+significant_terms <- regression_table %>%
+  filter(p_value < 0.05)
+
+intercept_row <- significant_terms %>% filter(term == "intercept")
+intercept_value <- if (nrow(intercept_row) > 0) round(intercept_row$estimate, 2) else 0
+
+term_components <- significant_terms %>%
+  filter(term != "intercept") %>%
+  mutate(component = glue("{round(estimate, 2)} \\times {term}")) %>%
+  pull(component)
+
+equation_body <- paste(term_components, collapse = " + ")
+
+
+if (intercept_value != 0) {
+  intercept_text <- if (intercept_value < 0) {
+    glue("- {abs(intercept_value)}")
+  } else {
+    glue("+ {intercept_value}")
+  }
+  equation_body <- glue("{equation_body} {intercept_text}")
+}
+
+
+reg_eq <- glue("$$\n\\hat{{price\\_usd}} = {equation_body}\n$$")
+
+cat(reg_eq)
+```
+
+The mileage is excluded from the equation, since its p-value was higher than 0.05.
+
+## References
+[used-car-catalog](https://www.kaggle.com/datasets/lepchenkov/usedcarscatalog?resource=download)   
+[multiple regression notes](https://clemson.instructure.com/courses/249281/pages/notes-multiple-regression?module_item_id=4647358)  
+[image of purchasing a Used Car](https://s3.us-east-2.amazonaws.com/irwin-ag/buying-used/Figuring-Out-Need-Used-Cars-2.jpg)
+
+## Personal Information
+
+![Utkal Sirikonda](photo.png)
+
+Hello,
+I'm a Computer Science Graduate student passionate about learning new things. I work as a Software Engineer at Tabbi. I'm into adventure in my free time.
+
+## Code
+
+### Data Processing
+```{r, eval=FALSE, echo=TRUE}
+
+# Load required libraries
+library(tidyverse)
+library(DT)
+library(car)
+library(tibble)
+library(ggpubr)
+library(rstatix)
+library(moderndive)
+library(glue)
+
+# Importing data
+input_data <- read.csv("cars.csv", header = TRUE, stringsAsFactors = FALSE)
+
+# Drop NAs
+processed_data <- input_data %>%
+  drop_na(manufacturer_name, model_name, year_produced)
+
+#Convert Boolean Columns to Logical Type (TRUE/FALSE).
+
+processed_data <- processed_data %>%
+  mutate(across(c(engine_has_gas, has_warranty, is_exchangeable,starts_with("feature_")), 
+                ~ . == "True"))
+
+# Reshape feature_0 to feature_9 into a feature_count.
+
+processed_data <- processed_data %>%
+  mutate(feature_count = rowSums(select(., starts_with("feature_"))))
+
+
+# Filter out un-required variables.
+
+processed_data <- processed_data %>%
+  select(manufacturer_name, model_name, year_produced, 
+         engine_type, engine_capacity, transmission, 
+         body_type, drivetrain, color, mileage = odometer_value, engine_fuel,state,location_region,number_of_photos,
+         price_usd, has_warranty, is_exchangeable,duration_listed,up_counter, feature_count)
+
+
+# Final Data - Sampling
+
+# QQ Plot over processed data
+
+model <- lm(price_usd ~ manufacturer_name, data = processed_data)
+
+ggqqplot(residuals(model))
+
+# Mileage vs Price
+
+processed_data %>% ggplot(aes(x=mileage, y=price_usd)) + geom_point()
+
+# Taking 50 random samples from processed data:
+
+sampled_data <- processed_data %>% slice_sample(n = 50)
+
+
+# Descriptive Statistics
+
+desc_stats <- processed_data %>%
+  select(where(is.numeric)) %>%
+  pivot_longer(cols = everything(), names_to = "variable_name", values_to = "value") %>%
+  group_by(variable_name) %>%
+  summarise(
+    count = sum(!is.na(value)),
+    mean = mean(value, na.rm = TRUE),
+    sd = sd(value, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+datatable(desc_stats)
+
+
+# Multiple Regression to estimate Price
+
+# Plots
+sampled_data %>% ggplot(aes(x=mileage, y=price_usd)) + geom_point()
+sampled_data %>% ggplot(aes(x=year_produced, y=price_usd)) + geom_point()
+#.
+#.
+#.
+
+# model
+multi_model <- lm(price_usd ~ mileage + year_produced + number_of_photos + feature_count + engine_capacity, data = sampled_data)
+
+# QQ Plot of residuals
+ggqqplot(residuals(multi_model))
+
+# Regression summary
+summary <- get_regression_summaries(multi_model, digits = 25)
+
+
+# Equation
+
+# {r, results='asis'} # keep asis to avoid the equation shown as a comment
+
+# Filter out significant terms (p < 0.05)
+
+significant_terms <- regression_table %>%
+  filter(p_value < 0.05)
+
+# Extract intercept separately
+
+intercept_row <- significant_terms %>% filter(term == "intercept")
+intercept_value <- if (nrow(intercept_row) > 0) round(intercept_row$estimate, 2) else 0
+
+# Build terms string (excluding intercept)
+
+term_components <- significant_terms %>%
+  filter(term != "intercept") %>%
+  mutate(
+    component = glue("{round(estimate, 2)} \\times {term}")
+  ) %>%
+  pull(component)
+
+# Combine components and intercept
+
+equation_body <- paste(term_components, collapse = " + ")
+
+# Add intercept with sign
+
+if (intercept_value != 0) {
+  intercept_text <- if (intercept_value < 0) {
+    glue("- {abs(intercept_value)}")
+  } else {
+    glue("+ {intercept_value}")
+  }
+  equation_body <- glue("{equation_body} {intercept_text}")
+}
+
+# Final equation
+
+reg_eq <- glue("$$\n\\hat{{price\\_usd}} = {equation_body}\n$$")
+
+# Show the Latex equation
+cat(reg_eq)
+```
+
+
+
+
